@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+venv/
+*.log
+*.xlsx  # Si los archivos generados no deben subirse
