@@ -27,7 +27,7 @@
 
 1. Clonar repositorio:
 ```bash
-git clone [https://github.com/leftra123/tu-repositorio.git](https://github.com/leftra123/colab.git)
+git clone https://github.com/leftra123/colab.git
 cd colab
 ```
 
