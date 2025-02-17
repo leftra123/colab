@@ -27,8 +27,8 @@
 
 1. Clonar repositorio:
 ```bash
-git clone https://github.com/leftra123/tu-repositorio.git
-cd tu-repositorio
+git clone [https://github.com/leftra123/tu-repositorio.git](https://github.com/leftra123/colab.git)
+cd colab
 ```
 
 2. Crear y activar entorno virtual:
