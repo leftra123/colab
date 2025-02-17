@@ -36,6 +36,48 @@ logging.basicConfig(
     ]
 )
 
+
+# === CLASES BASE ===
+class BaseProcessor:
+    """Clase base para procesadores de remuneraciones"""
+    
+    def validate_file(self, file_path: Path) -> None:
+        """Validaciones comunes de archivos"""
+        if not file_path.exists():
+            raise FileNotFoundError(f"Archivo no encontrado: {file_path}")
+        if file_path.suffix.lower() not in ('.xlsx', '.xls'):
+            raise ValueError("Formato de archivo no válido")
+        if file_path.stat().st_size == 0:
+            raise ValueError("El archivo está vacío")
+
+    def safe_save(self, data: pd.DataFrame, output_path: Path) -> None:
+        """Guardado con reintentos"""
+        for attempt in range(3):
+            try:
+                data.to_excel(str(output_path), index=False, engine='openpyxl')
+                return
+            except PermissionError:
+                if attempt == 2:
+                    raise
+                time.sleep(1)
+
+class BaseWorker(QThread):
+    """Clase base para workers de procesamiento"""
+    
+    progress_updated = pyqtSignal(int, str)
+    process_finished = pyqtSignal(str)
+    error_occurred = pyqtSignal(str)
+    
+    def __init__(self, input_path: Path, output_path: Path):
+        super().__init__()
+        self.input_path = input_path
+        self.output_path = output_path
+        self._abort = False
+
+    def abort(self):
+        self._abort = True
+
+
 ##############################
 # Procesador SEP
 ##############################
@@ -339,7 +381,7 @@ class ProcessorWorker(QThread):
 class ExcelProcessorApp(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("RemuPro - Procesador de Remuneraciones")
+        self.setWindowTitle("RemuPro | v1.0")
         self.resize(650, 450)
         
         self.input_path: Path = None
@@ -355,7 +397,7 @@ class ExcelProcessorApp(QWidget):
         modo_layout = QHBoxLayout()
         lbl_modo = QLabel("Modo de procesamiento:")
         self.combo_modo = QComboBox()
-        self.combo_modo.addItems(["SEP", "PIE"])
+        self.combo_modo.addItems(["SEP", "PIE-NORMAL"])
         modo_layout.addWidget(lbl_modo)
         modo_layout.addWidget(self.combo_modo)
         layout.addLayout(modo_layout)
@@ -433,7 +475,7 @@ class ExcelProcessorApp(QWidget):
         modo = self.combo_modo.currentText()
         if modo == "SEP":
             processor = SEPProcessor()
-        elif modo == "PIE":
+        elif modo == "PIE-NORMAL":
             processor = PIEProcessor()
         else:
             QMessageBox.critical(self, "Error", "Modo de procesamiento no reconocido.")

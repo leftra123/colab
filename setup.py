@@ -1,5 +1,7 @@
 from setuptools import setup
 
+VERSION = '1.0.0'
+
 APP = ['main.py']
 DATA_FILES = []
 OPTIONS = {
@@ -9,6 +11,19 @@ OPTIONS = {
 }
 
 setup(
+    name='RemuPro',
+    version=VERSION,
+    author='Eric Aguayo Quintriqueo',
+    author_email='leftra123@gmail.com',
+    url='https://github.com/leftra123/colab',
+    description='Sistema de Procesamiento de Remuneraciones SEP/PIE-NORMAL',
+    long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
+    classifiers=[
+        'Programming Language :: Python :: 3',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: OS Independent',
+    ],
     app=APP,
     data_files=DATA_FILES,
     options={'py2app': OPTIONS},
