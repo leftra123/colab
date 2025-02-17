@@ -1,6 +1,6 @@
 from setuptools import setup
 
-VERSION = '1.0.0'
+VERSION = '2.1.0'
 
 APP = ['main.py']
 DATA_FILES = []
@@ -17,7 +17,7 @@ setup(
     author_email='leftra123@gmail.com',
     url='https://github.com/leftra123/colab',
     description='Sistema de Procesamiento de Remuneraciones SEP/PIE-NORMAL',
-    long_description=open('README.md').read(),
+    long_description=open('README.md').read() if 'README.md' in __import__('os').listdir('.') else '',
     long_description_content_type='text/markdown',
     classifiers=[
         'Programming Language :: Python :: 3',
