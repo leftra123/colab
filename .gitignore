@@ -5,3 +5,4 @@ venv/
 *.xlsx  # Si los archivos generados no deben subirse
 /build
 /dist
+test.py
