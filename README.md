@@ -1,3 +1,4 @@
+
 # RemuPro 📊
 ### Sistema de Procesamiento de Remuneraciones SEP - PIE - NORMAL
 
@@ -85,11 +86,7 @@ RemuPro está construido con una arquitectura modular que permite:
 
 ## 🛠️ Tecnologías Utilizadas
 
-<div align="center">
-  <img src="https://www.python.org/static/community_logos/python-logo.png" alt="Python" width="200"/>
-  <img src="https://upload.wikimedia.org/wikipedia/commons/e/e6/Python_and_Qt.svg" alt="PyQt" width="200"/>
-  <img src="https://upload.wikimedia.org/wikipedia/commons/8/86/Microsoft_Excel_2013_logo.svg" alt="Excel" width="200"/>
-</div>
+<div  align="center"> <table  border="0"> <tr> <td><img  src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/python/python.png"  width="150"  alt="Python Logo"/></td> <td><img  src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Qt_logo_2016.svg"  width="150"  alt="Qt Logo"/></td> <td><img  src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Microsoft_Office_Excel_%282019%E2%80%93present%29.svg/512px-Microsoft_Office_Excel_%282019%E2%80%93present%29.svg.png"  width="150"  alt="Excel Logo"/></td> </tr> </table> </div>
 
 ## 📝 Licencia
 
