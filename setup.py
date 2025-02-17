@@ -1,10 +1,12 @@
 from setuptools import setup
 
-VERSION = '2.1.0'
+VERSION = '2.1.1'
 
 APP = ['main.py']
 DATA_FILES = []
 OPTIONS = {
+    'argv_emulation': False,
+    'iconfile': 'icon.ico',
     'packages': ['pandas', 'numpy', 'openpyxl', 'PyQt5'],
     'excludes': ['unittest', 'doctest', 'pydoc', 'test'],
     'includes': ['pandas', 'numpy', 'cmath'],
