@@ -11,11 +11,14 @@ from processors.duplicados import DuplicadosProcessor
 from core.workers import ProcessorWorker, DuplicadosWorker
 
 # Configuración de logging
+log_path = Path.home() / "AppData" / "Local" / "RemuPro" / "logs" if sys.platform == 'win32' else Path('.')
+log_path.mkdir(parents=True, exist_ok=True)
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('proceso_remuneraciones.log'),
+        logging.FileHandler(log_path / 'proceso_remuneraciones.log'),
         logging.StreamHandler()
     ]
 )
@@ -305,6 +308,14 @@ class ExcelProcessorApp(QWidget):
         self.progress_bar.setValue(0)
 
 def main():
+    # Configuración de DPI para Windows (evita problemas de escalado en pantallas de alta resolución)
+    if sys.platform == 'win32':
+        import ctypes
+        try:
+            ctypes.windll.user32.SetProcessDPIAware()
+        except Exception as e:
+            logging.warning(f"No se pudo configurar DPI en Windows: {str(e)}")
+    
     app = QApplication(sys.argv)
     window = ExcelProcessorApp()
     window.show()

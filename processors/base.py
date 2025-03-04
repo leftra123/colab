@@ -1,4 +1,5 @@
 import time
+import sys
 from pathlib import Path
 import pandas as pd
 
@@ -26,5 +27,9 @@ class BaseProcessor:
                 return
             except PermissionError:
                 if attempt == 2:
-                    raise
+                    if sys.platform == 'win32':
+                        message = "El archivo está siendo utilizado por otro programa. Ciérrelo e intente nuevamente."
+                    else:
+                        message = "Error de permisos al acceder al archivo."
+                    raise PermissionError(message)
                 time.sleep(1)

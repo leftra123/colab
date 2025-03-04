@@ -1,3 +1,4 @@
+import sys
 import time
 import logging
 import pandas as pd
@@ -106,7 +107,7 @@ class PIEProcessor(BaseProcessor):
             if not docentes_con_exceso:
                 logging.info("No se encontró personal que supere las 44 horas totales")
             progress_callback(90, "Exportando datos PIE...")
-            datos_combinados.to_excel(str(output_path), index=False, engine='openpyxl')
+            self.safe_save(datos_combinados, output_path) 
             progress_callback(100, "Proceso PIE completado!")
         except Exception as e:
             logging.error(f"Error en PIE process_file: {str(e)}", exc_info=True)

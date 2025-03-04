@@ -1,4 +1,5 @@
 import time
+import sys
 import logging
 import pandas as pd
 import numpy as np
@@ -27,7 +28,11 @@ class SEPProcessor(BaseProcessor):
                 return self.load_data(file_path)
             except PermissionError:
                 if attempt == max_retries - 1:
-                    raise
+                    if sys.platform == 'win32':
+                        message = "El archivo de entrada está siendo utilizado por otro programa. Ciérrelo e intente nuevamente."
+                    else:
+                        message = "Error de permisos al acceder al archivo de entrada."
+                    raise PermissionError(message)
                 time.sleep(delay)
                 logging.warning(f"Reintento {attempt + 1} para abrir el archivo")
         return None
@@ -140,5 +145,9 @@ class SEPProcessor(BaseProcessor):
                 return
             except PermissionError:
                 if attempt == 2:
-                    raise
+                    if sys.platform == 'win32':
+                        message = "El archivo de salida está siendo utilizado por otro programa. Ciérrelo e intente nuevamente."
+                    else:
+                        message = "Error de permisos al guardar el archivo de salida."
+                    raise PermissionError(message)
                 time.sleep(1)
