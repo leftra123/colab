@@ -264,19 +264,13 @@ class ProcessorWindow(QWidget):
 
     def fade_in(self):
         """Anima la entrada de la ventana"""
-        try:
-            self.setWindowOpacity(0.0)
-            # Guardar referencia de animación para evitar garbage collection
-            self._fade_in_anim = QPropertyAnimation(self, b"windowOpacity")
-            self._fade_in_anim.setDuration(500)
-            self._fade_in_anim.setStartValue(0.0)
-            self._fade_in_anim.setEndValue(1.0)
-            self._fade_in_anim.setEasingCurve(QEasingCurve.InOutQuad)
-            self._fade_in_anim.start()
-        except Exception as e:
-            logging.error(f"Error en animación fade-in: {e}")
-            # Si falla la animación, simplemente mostrar la ventana
-            self.setWindowOpacity(1.0)
+        self.setWindowOpacity(0.0)
+        anim = QPropertyAnimation(self, b"windowOpacity")
+        anim.setDuration(500)
+        anim.setStartValue(0.0)
+        anim.setEndValue(1.0)
+        anim.setEasingCurve(QEasingCurve.InOutQuad)
+        anim.start()
 
     def toggle_dup_options(self, checked):
         """Muestra/oculta opciones de duplicados"""
@@ -328,68 +322,27 @@ class ProcessorWindow(QWidget):
             QMessageBox.warning(self, "Error", "Debe seleccionar archivo de entrada y destino.")
             return
 
-        try:
-            # Deshabilitar controles
-            self.btn_start.setEnabled(False)
-            self.btn_select_input.setEnabled(False)
-            self.btn_select_output.setEnabled(False)
-            self.combo_modo.setEnabled(False)
-            self.progress_bar.setValue(0)
-            self.status_label.setText("⚙️ Iniciando proceso...")
+        self.btn_start.setEnabled(False)
+        self.btn_select_input.setEnabled(False)
+        self.btn_select_output.setEnabled(False)
+        self.progress_bar.setValue(0)
+        self.status_label.setText("⚙️ Iniciando proceso...")
 
-            # Cambiar cursor
-            self.setCursor(Qt.WaitCursor)
-
-            # Crear procesador según modo
-            modo = self.combo_modo.currentText()
-            if modo == "SEP":
-                processor = SEPProcessor()
-            elif modo == "PIE-NORMAL":
-                processor = PIEProcessor()
-            else:
-                raise ValueError(f"Modo de procesamiento no reconocido: {modo}")
-
-            # Crear y configurar worker
-            self.worker = ProcessorWorker(processor, self.input_path, self.output_path)
-            self.worker.progress_signal.connect(self.update_progress)
-            self.worker.finished_signal.connect(self.process_finished)
-            self.worker.error_signal.connect(self.process_error)
-
-            # Iniciar procesamiento
-            self.worker.start()
-
-            # Restaurar cursor
-            self.setCursor(Qt.ArrowCursor)
-
-        except ImportError as e:
-            logging.error(f"Error al importar procesador: {e}")
-            self.setCursor(Qt.ArrowCursor)
-            QMessageBox.critical(
-                self,
-                "❌ Error de Importación",
-                f"No se pudo cargar el procesador {modo}.\n\nError técnico: {str(e)}\n\nPor favor, reinstale la aplicación."
-            )
+        modo = self.combo_modo.currentText()
+        if modo == "SEP":
+            processor = SEPProcessor()
+        elif modo == "PIE-NORMAL":
+            processor = PIEProcessor()
+        else:
+            QMessageBox.critical(self, "Error", "Modo de procesamiento no reconocido.")
             self.reset_ui()
+            return
 
-        except ValueError as e:
-            logging.error(f"Error de validación: {e}")
-            self.setCursor(Qt.ArrowCursor)
-            QMessageBox.critical(
-                self,
-                "❌ Error de Validación",
-                f"Error en la configuración del procesamiento.\n\nError: {str(e)}"
-            )
-            self.reset_ui()
-
-        except Exception as e:
-            logging.error(f"Error inesperado al iniciar proceso: {e}")
-            self.setCursor(Qt.ArrowCursor)
-            QMessageBox.critical(
-                self,
-                "❌ Error Inesperado",
-                f"Ocurrió un error al iniciar el procesamiento.\n\nError: {str(e)}\n\nIntente nuevamente o contacte al soporte."
-            )
-            self.reset_ui()
+        self.worker = ProcessorWorker(processor, self.input_path, self.output_path)
+        self.worker.progress_signal.connect(self.update_progress)
+        self.worker.finished_signal.connect(self.process_finished)
+        self.worker.error_signal.connect(self.process_error)
+        self.worker.start()
 
     # === Métodos de duplicados ===
 
@@ -441,68 +394,19 @@ class ProcessorWindow(QWidget):
             QMessageBox.warning(self, "Error", "Debe seleccionar ambos archivos de entrada y un destino.")
             return
 
-        try:
-            # Deshabilitar controles
-            self.btn_start_dup.setEnabled(False)
-            self.btn_select_input_dup1.setEnabled(False)
-            self.btn_select_input_dup2.setEnabled(False)
-            self.btn_select_output_dup.setEnabled(False)
-            self.progress_bar.setValue(0)
-            self.status_label.setText("⚙️ Iniciando proceso de duplicados...")
+        self.btn_start_dup.setEnabled(False)
+        self.btn_select_input_dup1.setEnabled(False)
+        self.btn_select_input_dup2.setEnabled(False)
+        self.btn_select_output_dup.setEnabled(False)
+        self.progress_bar.setValue(0)
+        self.status_label.setText("⚙️ Iniciando proceso de duplicados...")
 
-            # Cambiar cursor
-            self.setCursor(Qt.WaitCursor)
-
-            # Validar que los archivos existan
-            if not self.input_dup1.exists():
-                raise FileNotFoundError(f"El archivo no existe: {self.input_dup1}")
-            if not self.input_dup2.exists():
-                raise FileNotFoundError(f"El archivo no existe: {self.input_dup2}")
-
-            # Crear procesador
-            processor = DuplicadosProcessor()
-
-            # Crear y configurar worker
-            self.worker_dup = DuplicadosWorker(processor, self.input_dup1, self.input_dup2, self.output_dup)
-            self.worker_dup.progress_signal.connect(self.update_progress)
-            self.worker_dup.finished_signal.connect(self.process_finished_dup)
-            self.worker_dup.error_signal.connect(self.process_error)
-
-            # Iniciar procesamiento
-            self.worker_dup.start()
-
-            # Restaurar cursor
-            self.setCursor(Qt.ArrowCursor)
-
-        except FileNotFoundError as e:
-            logging.error(f"Archivo no encontrado: {e}")
-            self.setCursor(Qt.ArrowCursor)
-            QMessageBox.critical(
-                self,
-                "❌ Archivo No Encontrado",
-                f"No se pudo encontrar el archivo seleccionado.\n\nError: {str(e)}\n\nPor favor, seleccione un archivo válido."
-            )
-            self.reset_ui()
-
-        except ImportError as e:
-            logging.error(f"Error al importar DuplicadosProcessor: {e}")
-            self.setCursor(Qt.ArrowCursor)
-            QMessageBox.critical(
-                self,
-                "❌ Error de Importación",
-                f"No se pudo cargar el procesador de duplicados.\n\nError técnico: {str(e)}\n\nPor favor, reinstale la aplicación."
-            )
-            self.reset_ui()
-
-        except Exception as e:
-            logging.error(f"Error inesperado al iniciar proceso de duplicados: {e}")
-            self.setCursor(Qt.ArrowCursor)
-            QMessageBox.critical(
-                self,
-                "❌ Error Inesperado",
-                f"Ocurrió un error al iniciar el procesamiento de duplicados.\n\nError: {str(e)}\n\nIntente nuevamente o contacte al soporte."
-            )
-            self.reset_ui()
+        processor = DuplicadosProcessor()
+        self.worker_dup = DuplicadosWorker(processor, self.input_dup1, self.input_dup2, self.output_dup)
+        self.worker_dup.progress_signal.connect(self.update_progress)
+        self.worker_dup.finished_signal.connect(self.process_finished_dup)
+        self.worker_dup.error_signal.connect(self.process_error)
+        self.worker_dup.start()
 
     # === Métodos de actualización y finalización ===
 
@@ -546,69 +450,33 @@ class ProcessorWindow(QWidget):
 
     def reset_ui(self):
         """Reinicia la interfaz"""
-        try:
-            # Reinicia SEP/PIE
-            self.input_path = None
-            self.output_path = None
-            self.label_input.setText("📄 Archivo Excel de entrada: No seleccionado")
-            self.label_output.setText("💾 Guardar archivo en: No seleccionado")
-            self.btn_start.setEnabled(False)
-            self.btn_select_input.setEnabled(True)
-            self.btn_select_output.setEnabled(True)
-            self.combo_modo.setEnabled(True)
+        # Reinicia SEP/PIE
+        self.input_path = None
+        self.output_path = None
+        self.label_input.setText("📄 Archivo Excel de entrada: No seleccionado")
+        self.label_output.setText("💾 Guardar archivo en: No seleccionado")
+        self.btn_start.setEnabled(False)
+        self.btn_select_input.setEnabled(True)
+        self.btn_select_output.setEnabled(True)
 
-            # Reinicia duplicados
-            self.input_dup1 = None
-            self.input_dup2 = None
-            self.output_dup = None
-            self.label_input_dup1.setText("📄 Archivo Duplicados 1: No seleccionado")
-            self.label_input_dup2.setText("📄 Archivo Duplicados 2: No seleccionado")
-            self.label_output_dup.setText("💾 Guardar resultado en: No seleccionado")
-            self.btn_start_dup.setEnabled(False)
-            self.btn_select_input_dup1.setEnabled(True)
-            self.btn_select_input_dup2.setEnabled(True)
-            self.btn_select_output_dup.setEnabled(True)
+        # Reinicia duplicados
+        self.input_dup1 = None
+        self.input_dup2 = None
+        self.output_dup = None
+        self.label_input_dup1.setText("📄 Archivo Duplicados 1: No seleccionado")
+        self.label_input_dup2.setText("📄 Archivo Duplicados 2: No seleccionado")
+        self.label_output_dup.setText("💾 Guardar resultado en: No seleccionado")
+        self.btn_start_dup.setEnabled(False)
+        self.btn_select_input_dup1.setEnabled(True)
+        self.btn_select_input_dup2.setEnabled(True)
+        self.btn_select_output_dup.setEnabled(True)
 
-            self.status_label.setText("⏳ Esperando acción...")
-            self.progress_bar.setValue(0)
-
-            # Restaurar cursor si está en espera
-            self.setCursor(Qt.ArrowCursor)
-
-        except Exception as e:
-            logging.error(f"Error al reiniciar UI: {e}")
+        self.status_label.setText("⏳ Esperando acción...")
+        self.progress_bar.setValue(0)
 
     def go_back(self):
         """Vuelve a la landing page"""
-        try:
-            # Cambiar cursor
-            self.setCursor(Qt.WaitCursor)
-
-            # Importar y crear landing page
-            from ui.landing_page import LandingPage
-            self.landing = LandingPage()
-            self.landing.show()
-
-            # Restaurar cursor y cerrar
-            self.setCursor(Qt.ArrowCursor)
-            self.close()
-
-        except ImportError as e:
-            logging.error(f"Error al importar LandingPage: {e}")
-            self.setCursor(Qt.ArrowCursor)
-            QMessageBox.critical(
-                self,
-                "❌ Error de Importación",
-                f"No se pudo cargar la pantalla principal.\n\nError técnico: {str(e)}\n\nLa aplicación se cerrará."
-            )
-            self.close()
-
-        except Exception as e:
-            logging.error(f"Error inesperado al volver: {e}")
-            self.setCursor(Qt.ArrowCursor)
-            QMessageBox.critical(
-                self,
-                "❌ Error Inesperado",
-                f"Ocurrió un error al volver a la pantalla principal.\n\nError: {str(e)}\n\nLa aplicación se cerrará."
-            )
-            self.close()
+        from ui.landing_page import LandingPage
+        self.landing = LandingPage()
+        self.landing.show()
+        self.close()

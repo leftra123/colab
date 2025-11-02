@@ -160,105 +160,42 @@ class DevelopmentWindow(QWidget):
 
     def fade_in(self):
         """Anima la entrada de la ventana con fade-in"""
-        try:
-            self.setWindowOpacity(0.0)
+        self.setWindowOpacity(0.0)
 
-            # Guardar referencia para evitar garbage collection
-            self._fade_in_animation = QPropertyAnimation(self, b"windowOpacity")
-            self._fade_in_animation.setDuration(600)
-            self._fade_in_animation.setStartValue(0.0)
-            self._fade_in_animation.setEndValue(1.0)
-            self._fade_in_animation.setEasingCurve(QEasingCurve.InOutQuad)
-            self._fade_in_animation.start()
-        except Exception as e:
-            import logging
-            logging.error(f"Error en animación fade-in: {e}")
-            # Si falla la animación, mostrar ventana normalmente
-            self.setWindowOpacity(1.0)
+        self.fade_animation = QPropertyAnimation(self, b"windowOpacity")
+        self.fade_animation.setDuration(600)
+        self.fade_animation.setStartValue(0.0)
+        self.fade_animation.setEndValue(1.0)
+        self.fade_animation.setEasingCurve(QEasingCurve.InOutQuad)
+        self.fade_animation.start()
 
     def go_back(self):
         """Vuelve al menú principal"""
-        try:
-            # Deshabilitar botón para evitar doble-click
-            self.btn_back.setEnabled(False)
+        self.message_timer.stop()
+        self.loading_widget.stop()
 
-            # Detener timers y animaciones
-            if hasattr(self, 'message_timer') and self.message_timer.isActive():
-                self.message_timer.stop()
-            if hasattr(self, 'loading_widget'):
-                self.loading_widget.stop()
-
-            # Cambiar cursor
-            self.setCursor(Qt.WaitCursor)
-
-            # Animación de fade-out antes de cerrar (guardar referencia)
-            self._fade_out_animation = QPropertyAnimation(self, b"windowOpacity")
-            self._fade_out_animation.setDuration(400)
-            self._fade_out_animation.setStartValue(1.0)
-            self._fade_out_animation.setEndValue(0.0)
-            self._fade_out_animation.setEasingCurve(QEasingCurve.InOutQuad)
-            self._fade_out_animation.finished.connect(self.open_landing_page)
-            self._fade_out_animation.start()
-
-        except Exception as e:
-            import logging
-            logging.error(f"Error al volver: {e}")
-            self.setCursor(Qt.ArrowCursor)
-            # Si falla, intentar abrir landing page directamente
-            self.open_landing_page()
+        # Animación de fade-out antes de cerrar
+        fade_out = QPropertyAnimation(self, b"windowOpacity")
+        fade_out.setDuration(400)
+        fade_out.setStartValue(1.0)
+        fade_out.setEndValue(0.0)
+        fade_out.setEasingCurve(QEasingCurve.InOutQuad)
+        fade_out.finished.connect(self.open_landing_page)
+        fade_out.start()
 
     def open_landing_page(self):
         """Abre la landing page"""
-        try:
-            from ui.landing_page import LandingPage
-            self.landing = LandingPage()
-            self.landing.show()
-            self.setCursor(Qt.ArrowCursor)
-            self.close()
-
-        except ImportError as e:
-            import logging
-            from PyQt5.QtWidgets import QMessageBox
-            logging.error(f"Error al importar LandingPage: {e}")
-            self.setCursor(Qt.ArrowCursor)
-            QMessageBox.critical(
-                self,
-                "❌ Error de Importación",
-                f"No se pudo cargar la pantalla principal.\n\nError técnico: {str(e)}\n\nLa aplicación se cerrará."
-            )
-            self.close()
-
-        except Exception as e:
-            import logging
-            from PyQt5.QtWidgets import QMessageBox
-            logging.error(f"Error inesperado al abrir landing page: {e}")
-            self.setCursor(Qt.ArrowCursor)
-            QMessageBox.critical(
-                self,
-                "❌ Error Inesperado",
-                f"Ocurrió un error al volver a la pantalla principal.\n\nError: {str(e)}\n\nLa aplicación se cerrará."
-            )
-            self.close()
+        from ui.landing_page import LandingPage
+        self.landing = LandingPage()
+        self.landing.show()
+        self.close()
 
     def closeEvent(self, event):
         """Maneja el evento de cierre"""
-        try:
-            # Detener timer si existe
-            if hasattr(self, 'message_timer') and self.message_timer is not None:
-                if self.message_timer.isActive():
-                    self.message_timer.stop()
-
-            # Detener loading widget si existe
-            if hasattr(self, 'loading_widget') and self.loading_widget is not None:
-                self.loading_widget.stop()
-
-            event.accept()
-
-        except Exception as e:
-            import logging
-            logging.error(f"Error al cerrar ventana: {e}")
-            # Aceptar el evento de todos modos para cerrar
-            event.accept()
+        self.message_timer.stop()
+        if hasattr(self, 'loading_widget'):
+            self.loading_widget.stop()
+        event.accept()
 
 
 def main():
