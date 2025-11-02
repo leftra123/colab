@@ -139,17 +139,93 @@ class LandingPage(QWidget):
 
     def open_separated_processor(self):
         """Abre la ventana de procesamiento separado"""
-        from ui.processor_window import ProcessorWindow
-        self.processor_window = ProcessorWindow()
-        self.processor_window.show()
-        self.close()
+        try:
+            # Deshabilitar botones para evitar doble-click
+            self.btn_separated.setEnabled(False)
+            self.btn_consolidated.setEnabled(False)
+
+            # Cambiar cursor a espera
+            from PyQt5.QtCore import Qt
+            self.setCursor(Qt.WaitCursor)
+
+            # Importar y crear ventana
+            from ui.processor_window import ProcessorWindow
+            self.processor_window = ProcessorWindow()
+            self.processor_window.show()
+
+            # Restaurar cursor y cerrar
+            self.setCursor(Qt.ArrowCursor)
+            self.close()
+
+        except ImportError as e:
+            import logging
+            from PyQt5.QtWidgets import QMessageBox
+            logging.error(f"Error al importar ProcessorWindow: {e}")
+            self.setCursor(Qt.ArrowCursor)
+            self.btn_separated.setEnabled(True)
+            self.btn_consolidated.setEnabled(True)
+            QMessageBox.critical(
+                self,
+                "Error de Importación",
+                f"No se pudo cargar la ventana de procesamiento.\n\nError técnico: {str(e)}\n\nPor favor, reinstale la aplicación."
+            )
+        except Exception as e:
+            import logging
+            from PyQt5.QtWidgets import QMessageBox
+            logging.error(f"Error inesperado al abrir ProcessorWindow: {e}")
+            self.setCursor(Qt.ArrowCursor)
+            self.btn_separated.setEnabled(True)
+            self.btn_consolidated.setEnabled(True)
+            QMessageBox.critical(
+                self,
+                "Error Inesperado",
+                f"Ocurrió un error al abrir la ventana de procesamiento.\n\nError: {str(e)}"
+            )
 
     def open_consolidated_processor(self):
         """Abre la ventana de procesamiento consolidado (en desarrollo)"""
-        from ui.development_window import DevelopmentWindow
-        self.dev_window = DevelopmentWindow()
-        self.dev_window.show()
-        self.close()
+        try:
+            # Deshabilitar botones para evitar doble-click
+            self.btn_separated.setEnabled(False)
+            self.btn_consolidated.setEnabled(False)
+
+            # Cambiar cursor a espera
+            from PyQt5.QtCore import Qt
+            self.setCursor(Qt.WaitCursor)
+
+            # Importar y crear ventana
+            from ui.development_window import DevelopmentWindow
+            self.dev_window = DevelopmentWindow()
+            self.dev_window.show()
+
+            # Restaurar cursor y cerrar
+            self.setCursor(Qt.ArrowCursor)
+            self.close()
+
+        except ImportError as e:
+            import logging
+            from PyQt5.QtWidgets import QMessageBox
+            logging.error(f"Error al importar DevelopmentWindow: {e}")
+            self.setCursor(Qt.ArrowCursor)
+            self.btn_separated.setEnabled(True)
+            self.btn_consolidated.setEnabled(True)
+            QMessageBox.critical(
+                self,
+                "Error de Importación",
+                f"No se pudo cargar la ventana de desarrollo.\n\nError técnico: {str(e)}\n\nPor favor, reinstale la aplicación."
+            )
+        except Exception as e:
+            import logging
+            from PyQt5.QtWidgets import QMessageBox
+            logging.error(f"Error inesperado al abrir DevelopmentWindow: {e}")
+            self.setCursor(Qt.ArrowCursor)
+            self.btn_separated.setEnabled(True)
+            self.btn_consolidated.setEnabled(True)
+            QMessageBox.critical(
+                self,
+                "Error Inesperado",
+                f"Ocurrió un error al abrir la ventana de desarrollo.\n\nError: {str(e)}"
+            )
 
 
 def main():
